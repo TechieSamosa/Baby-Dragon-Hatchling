@@ -140,7 +140,7 @@ After training completed, running `python analyze.py` compiled the training traj
 ### 1. Training Curves (Loss Trajectories)
 *Compare the convergence speed and final cross-entropy loss across all 5 models.*
 
-![Training Loss Curves](results/plots/loss.png)
+![Training Loss Curves](results/loss.png)
 
 *   **The Transformer baseline** converges the fastest initially, due to the representational expressiveness of unshared parameters per layer.
 *   **BDH-NoMul** (additive interaction) converges the slowest and plateaus at the highest final loss, illustrating that multiplication is vital to its performance.
@@ -148,7 +148,7 @@ After training completed, running `python analyze.py` compiled the training traj
 ### 2. Component Impact Study (Ablations)
 *Signed $\Delta$ in Average Last-50 Loss compared to BDH Base. Positive values represent performance degradation (hurts the model), while negative values represent improvements.*
 
-![Component Impact Chart](results/plots/component_impact.png)
+![Component Impact Chart](results/component_impact.png)
 
 *   **Multiplicative Interaction is crucial (+0.059):** Replacing the gate with addition leads to a massive drop in performance. Without multiplication, conjunctive binding collapses.
 *   **Latent space compression helps (-0.052):** Reducing the multiplier from $m=128$ to $m=32$ slightly improves perplexity, showing that the base latent space is heavily over-parameterized at this scale.
