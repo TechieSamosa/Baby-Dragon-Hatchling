@@ -1,40 +1,21 @@
 import os
-import urllib.request
-import zipfile
 import numpy as np
 import torch
+from datasets import load_dataset
 
-def download_wikitext2_if_needed(data_dir="data"):
-    """Downloads WikiText-2 dataset if it doesn't exist."""
-    os.makedirs(data_dir, exist_ok=True)
-    raw_file = os.path.join(data_dir, "wikitext-2-raw-v1.zip")
-    train_file = os.path.join(data_dir, "wikitext-2-raw", "wiki.train.raw")
-    
-    if not os.path.exists(train_file):
-        print("Downloading WikiText-2...")
-        url = "https://s3.amazonaws.com/research.metamind.io/wikitext/wikitext-2-raw-v1.zip"
-        urllib.request.urlretrieve(url, raw_file)
-        with zipfile.ZipFile(raw_file, 'r') as zip_ref:
-            zip_ref.extractall(data_dir)
-        print("Download complete.")
-        
 def load_data(data_dir="data"):
     """Loads WikiText-2 byte-level dataset, splitting into train/val."""
-    download_wikitext2_if_needed(data_dir)
+    print("Loading WikiText-2 using HuggingFace datasets...")
+    dataset = load_dataset("wikitext", "wikitext-2-raw-v1")
     
-    # We combine train, valid, test and then split 90/10 as per paper
-    splits = ["wiki.train.raw", "wiki.valid.raw", "wiki.test.raw"]
     all_bytes = []
-    
-    for split in splits:
-        filepath = os.path.join(data_dir, "wikitext-2-raw", split)
-        if os.path.exists(filepath):
-            with open(filepath, 'rb') as f:
-                content = f.read()
-                # Remove empty lines (consecutive newlines) or just keep raw bytes.
-                # The paper says "removing empty lines, and saving as a memory-mapped binary file."
-                # For simplicity, we just use raw bytes directly.
-                all_bytes.extend(content)
+    # Combine train, validation, and test splits as per the paper
+    for split in ["train", "validation", "test"]:
+        for item in dataset[split]:
+            text = item['text']
+            if text.strip():  # paper says "removing empty lines"
+                # Encode text to bytes
+                all_bytes.extend(text.encode('utf-8'))
                 
     data_np = np.array(all_bytes, dtype=np.uint8)
     
